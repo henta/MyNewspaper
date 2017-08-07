@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="my.hhx.com.newpager.modules.zhihu.mvp.ZhihuArticleActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/article_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:theme="@style/Toolbar"/>
+
+            <ImageView
+                android:id="@+id/article_iv"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_wang_yi"
+                tools:ignore="ContentDescription" />
+
+
+
+
+    <com.github.ksoichiro.android.observablescrollview.ObservableWebView
+        android:id="@+id/article_web"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+    </com.github.ksoichiro.android.observablescrollview.ObservableWebView>
+
+
+</FrameLayout>

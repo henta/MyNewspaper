@@ -1,15 +1,18 @@
 package my.hhx.com.newpager.modules.zhihu.mvp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,7 @@ import my.hhx.com.newpager.R;
 import my.hhx.com.newpager.base.Card;
 import my.hhx.com.newpager.base.HxBaseRecyclerAdapter;
 import my.hhx.com.newpager.base.ZhihuDailyCard;
+import my.hhx.com.newpager.base.ZhihuTopCard;
 
 /**
  * Created by hhx on 2017/5/23.
@@ -35,8 +39,10 @@ public class ZhiHuDailyFragment extends Fragment implements SwipeRefreshLayout.O
     RecyclerView zhihuDailyRecycler;
     private ZhihuDailyPresenter zhihuDailyPresenter = new ZhihuDailyPresenter(this);
     private ArrayList<ZhihuDaily.StoriesBean> mList;
+    private ArrayList<ZhihuDaily.TopStoriesBean> mTopList;
     private HxBaseRecyclerAdapter mAdapter;
-
+    private boolean isFresh = false;
+    private boolean isLoading = false;
     Unbinder unbinder;
 
     @Nullable
@@ -50,7 +56,9 @@ public class ZhiHuDailyFragment extends Fragment implements SwipeRefreshLayout.O
 
     public void initView() {
         mList = new ArrayList<>();
-        zhihuDailyRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        mTopList = new ArrayList<>();
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        zhihuDailyRecycler.setLayoutManager(linearLayoutManager);
         zhihuDailySwipe.setColorSchemeResources(R.color.md_pink_100_color_code,
                 R.color.md_pink_200_color_code,
                 R.color.md_pink_300_color_code,
@@ -58,26 +66,45 @@ public class ZhiHuDailyFragment extends Fragment implements SwipeRefreshLayout.O
         zhihuDailySwipe.setOnRefreshListener(this);
         mAdapter = new HxBaseRecyclerAdapter();
         refreshData();
+        zhihuDailyRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (linearLayoutManager.findLastVisibleItemPosition() == mAdapter.getItemCount() - 1 && !isLoading && dy > 0) {
+                    isLoading = true;
+                    Log.i("Loading", String.valueOf(isLoading));
+                    zhihuDailyPresenter.loadData();
+
+                }
+
+            }
+        });
     }
 
 
     @Override
     public void refreshFail() {
         //没数据时才会显示无数据，有数据不变
-        if (mList == null) {
+        if (mList.isEmpty()) {
             noSeeTv.setVisibility(View.VISIBLE);
-            zhihuDailySwipe.setVisibility(View.INVISIBLE);
+            zhihuDailySwipe.setRefreshing(true);
+            Toast.makeText(getActivity(), "无法加载数据", Toast.LENGTH_SHORT).show();
+        } else {
+            zhihuDailySwipe.setRefreshing(true);
+            Toast.makeText(getActivity(), "无法加载数据，请检查网络后重试", Toast.LENGTH_SHORT).show();
         }
+
 
     }
 
     @Override
     public void refreshData() {
+        isFresh = true;
         zhihuDailyPresenter.refreshData();
     }
 
     @Override
-    public void refreshSuccess(ZhihuDaily zhihuDaily) {
+    public void refreshSuccess(final ZhihuDaily zhihuDaily) {
         if (zhihuDaily == null) {
             noSeeTv.setVisibility(View.VISIBLE);
             zhihuDailySwipe.requestFocus();
@@ -88,11 +115,24 @@ public class ZhiHuDailyFragment extends Fragment implements SwipeRefreshLayout.O
         if (mList != null) {
             mList.clear();
         }
+        if (mTopList != null) {
+            mTopList.clear();
+        }
         mAdapter.clear();
         mList.addAll(zhihuDaily.getStories());
-        mAdapter.setData(getCard(zhihuDaily));
+        mTopList.addAll(zhihuDaily.getTop_stories());
+        mAdapter.setData(getCard(zhihuDaily.getStories()));
         mAdapter.notifyDataSetChanged();
         zhihuDailyRecycler.setAdapter(mAdapter);
+        mAdapter.setOnClickListener(new HxBaseRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Intent intent=new Intent(getActivity(), ZhihuArticleActivity.class);
+                intent.putExtra("article",mList.get(position));
+                startActivity(intent);
+            }
+        });
+        isFresh = false;
 
     }
 
@@ -108,11 +148,27 @@ public class ZhiHuDailyFragment extends Fragment implements SwipeRefreshLayout.O
         zhihuDailySwipe.setRefreshing(false);
     }
 
-    public List<Card> getCard(ZhihuDaily zhihuDaily) {
+    @Override
+    public void loadMoreSuccess(List<ZhihuDaily.StoriesBean> storiesBeen) {
+        mList.addAll(storiesBeen);
+        mAdapter.addAll(getCard(storiesBeen));
+        isLoading = false;
+    }
+
+    @Override
+    public void loadMoreFail() {
+        Toast.makeText(getActivity(), "无法加载数据，请检查网络设置", Toast.LENGTH_SHORT).show();
+    }
+
+    public List<Card> getCard(List<ZhihuDaily.StoriesBean> storiesBean) {
         List<Card> cards = new ArrayList<>();
-        for (int i = 0; i < mList.size(); i++) {
-            cards.add(new ZhihuDailyCard(mList.get(i)));
+        if (isFresh) {
+            cards.add(new ZhihuTopCard(mTopList));
+        }
+        for (int i = 0; i < storiesBean.size(); i++) {
+            cards.add(new ZhihuDailyCard(storiesBean.get(i)));
         }
         return cards;
     }
+
 }

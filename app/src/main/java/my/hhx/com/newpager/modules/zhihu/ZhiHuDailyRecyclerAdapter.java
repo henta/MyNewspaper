@@ -39,8 +39,7 @@ public class ZhiHuDailyRecyclerAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ViewHolder myHolder= (ViewHolder) holder;
-        myHolder.zhihuDailyItemTitleTv.setText(mList.get(position).getStories().get(position).getTitle());
-        myHolder.zhihuDailyItemTimeTv.setText(mList.get(position).getDate());
+
     }
 
     @Override

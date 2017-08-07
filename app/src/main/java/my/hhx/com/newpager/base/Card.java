@@ -14,7 +14,8 @@ public interface Card {
      * @param viewType
      * @return
      */
-    HxBaseHolder onCreateViewHolder(ViewGroup parent, int viewType);
+
+    HxBaseHolder onCreateViewHolder(ViewGroup parent, int viewType, HxBaseRecyclerAdapter.OnItemClickListener listener);
 
     /**
      * 数据绑定

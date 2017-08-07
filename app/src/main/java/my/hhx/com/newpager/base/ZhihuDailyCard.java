@@ -19,13 +19,15 @@ public class ZhihuDailyCard extends HxBaseCard<ZhihuDaily.StoriesBean> {
         super(storiesBean);
     }
 
+
     @Override
-    public HxBaseHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public HxBaseHolder onCreateViewHolder(ViewGroup parent, int viewType, HxBaseRecyclerAdapter.OnItemClickListener listener) {
         return new HxBaseHolder(LayoutInflater.
                 from(parent.getContext()).
-                inflate(R.layout.zhihu_item, parent, false)
+                inflate(R.layout.zhihu_item, parent, false),listener
         );
     }
+
 
     @Override
     public void onBindViewHolder(HxBaseHolder holder, int position) {
@@ -38,7 +40,7 @@ public class ZhihuDailyCard extends HxBaseCard<ZhihuDaily.StoriesBean> {
 
     @Override
     public int getItemType() {
-        return 0;
+        return HxBaseRecyclerAdapter.ZHIHU_DAILY_CARD;
     }
 
     @Override

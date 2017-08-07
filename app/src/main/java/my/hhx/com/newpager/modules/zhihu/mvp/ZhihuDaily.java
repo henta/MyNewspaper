@@ -44,7 +44,7 @@ public class ZhihuDaily implements Serializable {
         this.top_stories = top_stories;
     }
 
-    public static class StoriesBean {
+    public static class StoriesBean implements Serializable {
         /**
          * images : ["https://pic2.zhimg.com/v2-050f2af92fffb5e33215f5bba7765ed5.jpg"]
          * type : 0
@@ -110,7 +110,7 @@ public class ZhihuDaily implements Serializable {
         }
     }
 
-    public static class TopStoriesBean {
+    public static class TopStoriesBean implements Serializable{
         /**
          * image : https://pic1.zhimg.com/v2-96db4cdeae99d481395ea6d5656415c8.jpg
          * type : 0
